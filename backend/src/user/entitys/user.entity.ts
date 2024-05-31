@@ -1,27 +1,30 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Unique,
 } from 'typeorm';
 
 @Entity()
+@Unique(['user_id', 'user_id_type'])
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @PrimaryColumn()
+  @Column()
   user_id: string; // 회원가입한 사람들 id
 
-  @PrimaryColumn({
+  @Column({
     length: 1,
+    type: 'char',
+    default: 'K',
   })
   user_id_type: string; // OAuth, 회원가입 구분용 / G : 구글, N : 네이버, K : 회원가입
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
 
   @Column({
@@ -40,12 +43,12 @@ export class User {
   @Column({ nullable: true })
   profile_image: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: Date;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 
-  @DeleteDateColumn()
-  deletedAt: Date;
+  @DeleteDateColumn({ type: 'timestamp' })
+  deleted_at: Date;
 }

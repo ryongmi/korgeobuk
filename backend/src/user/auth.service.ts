@@ -6,7 +6,8 @@ import {
 import { UserService } from './user.service';
 import { scrypt as _scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
-import { User } from './user.entity';
+import { User } from './entitys/user.entity';
+import { EntityManager } from 'typeorm';
 
 const scrypt = promisify(_scrypt);
 
@@ -31,11 +32,15 @@ export class AuthService {
     return user;
   }
 
-  async signup(attrs: Partial<User>) {
-    const users = await this.userService.findByUserId(attrs.user_id, 'K');
+  async signup(transactionManager: EntityManager, attrs: Partial<User>) {
+    const users = await this.userService.findByUserIdAndEmail(
+      attrs.user_id,
+      attrs.email,
+      'K',
+    );
 
     if (users.length) {
-      throw new NotFoundException('사용중인 아이디입니다.');
+      throw new BadRequestException('아이디나 이메일이 사용중입니다.');
     }
 
     const salt = randomBytes(8).toString('hex');
@@ -44,7 +49,11 @@ export class AuthService {
 
     const result = salt + ';' + hash.toString('hex');
 
-    const user = await this.userService.create(result, attrs);
+    const user = await this.userService.create(
+      transactionManager,
+      result,
+      attrs,
+    );
 
     return user;
   }

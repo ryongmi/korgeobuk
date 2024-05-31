@@ -4,7 +4,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user/user.entity';
+import { User } from './user/entitys/user.entity';
+import { Role } from './user/entitys/role.entity';
+import { User_Role } from './user/entitys/user_role.entity';
 
 @Module({
   imports: [
@@ -23,7 +25,8 @@ import { User } from './user/user.entity';
           password: config.get<string>('DB_PASSWORD'),
           database: config.get<string>('DB_NAME'),
           synchronize: true, // 개발에서만 true, 배포시 false로 변경해야함
-          entities: [User],
+          entities: [User, Role, User_Role],
+          logging: true,
         };
       },
     }),
