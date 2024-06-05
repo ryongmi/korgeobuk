@@ -9,13 +9,13 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { AuthService } from './auth.service';
-import { Serialize } from '../interceptors/serialize.interceptor';
+import { Serialize } from '../common/interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
-import { TransactionInterceptor } from 'src/interceptors/transaction.interceptor';
-import { TransactionManager } from 'src/decorators/transaction-manager.decorator';
+import { TransactionInterceptor } from '../common/interceptors/transaction.interceptor';
+import { TransactionManager } from '../common/decorators/transaction-manager.decorator';
 import { EntityManager } from 'typeorm';
 
-@Controller('api')
+@Controller('user')
 @Serialize(UserDto)
 export class UserController {
   constructor(

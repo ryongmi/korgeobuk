@@ -29,6 +29,7 @@ export class SerializerInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((data: any) => {
+        console.log('response DTO 적용');
         return plainToClass(this.dto, data, {
           excludeExtraneousValues: true,
         });

@@ -12,6 +12,7 @@ services:
   #     - frontend
   mysqldb:
     image: mysql:8.4
+    container_name: korgeobug-mysqldb
     restart: always
     volumes:
       - ./backend/mysqldata:/var/lib/mysql

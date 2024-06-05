@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/entitys/user.entity';
 import { Role } from './user/entitys/role.entity';
 import { User_Role } from './user/entitys/user_role.entity';
+import { LoggingMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
   imports: [
@@ -41,4 +42,12 @@ import { User_Role } from './user/entitys/user_role.entity';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  // 모든 컨트롤러에 들어오는 요청을 미들웨어에 통과시킴
+  // 요청이 들어오면 해당 로직을 마치고, 마지막으로 로그 미들웨어를 실행함
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggingMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

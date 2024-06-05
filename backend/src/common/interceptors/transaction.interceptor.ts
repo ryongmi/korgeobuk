@@ -4,7 +4,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { Observable, catchError, finalize, map } from 'rxjs';
+import { Observable, catchError, concatMap, finalize, map } from 'rxjs';
 import { DataSource } from 'typeorm';
 
 @Injectable()
@@ -26,7 +26,12 @@ export class TransactionInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       // 라우트 핸들러가 성공적으로 완료될 때 concatMap이 호출됩니다.
-      map(async (data) => {
+      // concatMap을 쓰는 이유
+      // 각각의 비동기 작업이 순차적으로 실행되어야 하기 때문에
+      // concatMap을 사용함, map, switchMap은 사용불가
+      // 예) map을 사용하면 커밋전에 finalize로 넘어가버려 에러 발생함
+      concatMap(async (data) => {
+        console.log('트랜잭션 완료');
         await queryRunner.commitTransaction();
         return data;
       }),
@@ -40,7 +45,9 @@ export class TransactionInterceptor implements NestInterceptor {
       // 상황에서도 release가 보장됩니다.
       finalize(async () => {
         console.log('트랜잭션 해제');
-        await queryRunner.release();
+        if (!queryRunner.isReleased) {
+          await queryRunner.release();
+        }
       }),
     );
   }

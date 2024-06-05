@@ -46,7 +46,6 @@ export class UserService {
     await transactionManager
       .getRepository(User_Role)
       .save({ user_id: user.id });
-
     return user;
   }
 }
