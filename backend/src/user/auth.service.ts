@@ -16,7 +16,7 @@ export class AuthService {
   constructor(private userService: UserService) {}
 
   async signin(userId: string, password: string) {
-    const [user] = await this.userService.findByUserId(userId, 'K');
+    const user = await this.userService.findByUserId(userId);
 
     if (!user) {
       throw new NotFoundException('로그인 정보가 일치하지 않습니다.');
@@ -33,13 +33,12 @@ export class AuthService {
   }
 
   async signup(transactionManager: EntityManager, attrs: Partial<User>) {
-    const users = await this.userService.findByUserIdAndEmail(
+    const users = await this.userService.findByUserIdOREmail(
       attrs.user_id,
       attrs.email,
-      'K',
     );
 
-    if (users.length) {
+    if (users.length !== 0) {
       throw new BadRequestException('아이디나 이메일이 사용중입니다.');
     }
 

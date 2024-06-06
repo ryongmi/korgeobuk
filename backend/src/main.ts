@@ -1,31 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
-import sessionConfig from './util/session';
-import { LoggingMiddleware } from './common/middleware/logger.middleware';
-import { ErrorLoggingInterceptor } from './common/interceptors/error-log.interceptor';
-// import session from 'express-session';
+import { setNestApp } from './setNestApp';
 
 async function bootstrap() {
-  const app = await NestFactory.create(
-    AppModule,
-    // , {logger: ['log', 'error', 'warn', 'debug'],}
-  );
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      // disableErrorMessages: true, // 유효성 검사에서 오류 반환시 오류 메시지를 없애줌
-    }),
-  );
+  const app = await NestFactory.create(AppModule);
 
-  // 모든 엔드포인트에 api 추가
-  app.setGlobalPrefix('api');
+  // 글로벌 설정
+  setNestApp(app);
 
-  // Error Log 전역 설정
-  app.useGlobalInterceptors(new ErrorLoggingInterceptor());
-  // app.use(new LoggingMiddleware().use);
-  // app.useGlobalMiddleware(LoggingMiddleware);
-  app.use(sessionConfig);
+  // const configService = app.get(ConfigService);
+  // const port = configService.get('port') || 8000;
 
   await app.listen(8000);
 }
