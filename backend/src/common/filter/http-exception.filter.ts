@@ -12,19 +12,30 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const request = ctx.getRequest();
     const response = ctx.getResponse();
+
+    const request = ctx.getRequest();
+    const { method, url, query, params, body, session } = request;
+    const queryParams = JSON.stringify(query);
+    const routeParams = JSON.stringify(params);
+    const requestBody = method !== 'GET' ? JSON.stringify(body) : null;
+
     const status = exception.getStatus();
     const error = exception.getResponse() as
       | string
       | { error: string; statusCode: number; message: string[] };
 
-    let logMessage = `${request.method} ${request.url} ${status} \nException Message: ${exception.message}`;
+    let logMessage = `${method} ${url} ${status} \nException Message: ${exception.message}`;
 
     if (typeof error === 'string') {
       logMessage += `\nResponse  Message: ${error}`;
     } else {
       logMessage += `\nResponse  Message: ${error.message}`;
+    }
+
+    logMessage += `\nSession User: ${session?.user?.id ?? null} \nQuery Params: ${queryParams} \nRoute Params: ${routeParams}`;
+    if (requestBody) {
+      logMessage += ` \nBody: ${requestBody}`;
     }
 
     this.logger.error(logMessage);
@@ -33,7 +44,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),
-      path: request.url,
+      path: url,
     });
   }
 }

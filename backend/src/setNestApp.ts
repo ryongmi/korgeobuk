@@ -2,6 +2,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 import { sessionConfig } from './database/session';
 import { SeederService } from './seeder/seeder.service';
+import { LoggingInterceptor } from './common/interceptors/logger.interceptor';
 
 export async function setNestApp(app: INestApplication) {
   app.useGlobalPipes(
@@ -11,14 +12,13 @@ export async function setNestApp(app: INestApplication) {
     }),
   );
 
-  // Error Log 전역 설정
-  // app.useGlobalInterceptors(new ErrorLoggingInterceptor());
-  // app.useGlobalMiddleware(LoggingMiddleware);
-
   // 모든 엔드포인트에 api 추가
   app.setGlobalPrefix('api');
 
-  // 글로벌 예외 필터를 설정합니다.
+  // 글로벌 Log 설정
+  app.useGlobalInterceptors(new LoggingInterceptor());
+
+  // 글로벌 예외 Log 설정
   app.useGlobalFilters(new HttpExceptionFilter());
 
   app.use(sessionConfig);

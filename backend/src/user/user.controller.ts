@@ -23,6 +23,12 @@ export class UserController {
     private authService: AuthService,
   ) {}
 
+  @Post('/test')
+  test(@Session() session: any) {
+    session.user = { id: 252 };
+    return 'test';
+  }
+
   @Post('/signout')
   signOut(@Session() session: any) {
     session.user = null;

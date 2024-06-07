@@ -1,8 +1,7 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
-import { LoggingMiddleware } from './common/middleware/logger.middleware';
 import { CustomConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
 import { SeederModule } from './seeder/seeder.module';
@@ -26,9 +25,9 @@ import { SeederModule } from './seeder/seeder.module';
 export class AppModule {
   // 모든 컨트롤러에 들어오는 요청을 미들웨어에 통과시킴
   // 요청이 들어오면 해당 로직을 마치고, 마지막으로 로그 미들웨어를 실행함
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(LoggingMiddleware)
-      .forRoutes({ path: '*', method: RequestMethod.ALL });
-  }
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer
+  //     .apply(LoggingMiddleware)
+  //     .forRoutes({ path: '*', method: RequestMethod.ALL });
+  // }
 }
