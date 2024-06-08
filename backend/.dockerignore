@@ -2,4 +2,5 @@
 .gitignore
 dist
 node_modules
+mysqldata
 README.md

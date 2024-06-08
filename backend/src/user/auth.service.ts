@@ -8,15 +8,59 @@ import { scrypt as _scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
 import { User } from './entitys/user.entity';
 import { EntityManager } from 'typeorm';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 
 const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private readonly httpService: HttpService,
+    private readonly config: ConfigService,
+  ) {}
+
+  async signinNaver(userId: string, password: string) {
+    const user = await this.userService.findByUserId(userId, 'K');
+
+    if (!user) {
+      throw new NotFoundException('로그인 정보가 일치하지 않습니다.');
+    }
+
+    const [salt, storedHash] = user.password.split(';');
+
+    const hash = (await scrypt(password, salt, 32)) as Buffer;
+    if (storedHash !== hash.toString('hex')) {
+      throw new BadRequestException('로그인 정보가 일치하지 않습니다.');
+    }
+
+    return user;
+  }
+
+  async signinGoogle(userId: string, password: string) {
+    const user = await this.userService.findByUserId(userId, 'K');
+
+    if (!user) {
+      throw new NotFoundException('로그인 정보가 일치하지 않습니다.');
+    }
+
+    const [salt, storedHash] = user.password.split(';');
+
+    const hash = (await scrypt(password, salt, 32)) as Buffer;
+    if (storedHash !== hash.toString('hex')) {
+      throw new BadRequestException('로그인 정보가 일치하지 않습니다.');
+    }
+
+    // const userInfoEndpoint = 'https://www.googleapis.com/oauth2/v2/userinfo';
+    // const headers = { Authorization: `Bearer ${accessToken}` };
+    // return this.httpService.get(userInfoEndpoint, { headers });
+
+    return user;
+  }
 
   async signin(userId: string, password: string) {
-    const user = await this.userService.findByUserId(userId);
+    const user = await this.userService.findByUserId(userId, 'K');
 
     if (!user) {
       throw new NotFoundException('로그인 정보가 일치하지 않습니다.');
@@ -36,6 +80,7 @@ export class AuthService {
     const users = await this.userService.findByUserIdOREmail(
       attrs.user_id,
       attrs.email,
+      'K',
     );
 
     if (users.length !== 0) {
@@ -56,7 +101,4 @@ export class AuthService {
 
     return user;
   }
-
-  async signinNaver() {}
-  async signinGoogle() {}
 }

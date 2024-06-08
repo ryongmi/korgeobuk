@@ -14,12 +14,16 @@ export class UserService {
     return await this.repo.findOneBy({ id });
   }
 
-  async findByUserId(user_id: string) {
-    return await this.repo.findOneBy({ user_id });
+  async findByUserId(user_id: string, user_id_type: string) {
+    return await this.repo.findOneBy({ user_id, user_id_type });
   }
 
-  async findByUserIdOREmail(user_id: string, email: string) {
-    return await this.repo.findBy([{ user_id }, { email }]);
+  async findByUserIdOREmail(
+    user_id: string,
+    email: string,
+    user_id_type: string,
+  ) {
+    return await this.repo.findBy([{ user_id, user_id_type }, { email }]);
   }
 
   async create(

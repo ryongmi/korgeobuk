@@ -37,8 +37,8 @@ export class User {
   })
   nickname: string;
 
-  @Column()
-  email: string;
+  @Column({ unique: true })
+  email: string; // 이메일은 무조건 한번만 가입가능하게
 
   @Column({ nullable: true })
   profile_image: string;
