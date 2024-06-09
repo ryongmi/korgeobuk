@@ -34,6 +34,7 @@ services:
       - /app/node_modules # 익명 볼륨
     ports:
       - 8000:8000
+      - 9229:9229 # Node.js 디버깅 포트
     env_file:
       - ./backend/.env.development.local
     environment:

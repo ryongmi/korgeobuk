@@ -1,5 +1,7 @@
 .git
 .gitignore
+.dockerignore
+DockerFile*
 dist
 node_modules
 README.md
