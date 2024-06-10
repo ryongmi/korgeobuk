@@ -3,12 +3,12 @@ import {
   Controller,
   Get,
   Post,
-  Req,
+  Query,
   Res,
   Session,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { AuthService } from './auth.service';
 import { Serialize } from '../common/interceptors/serialize.interceptor';
@@ -16,102 +16,169 @@ import { UserDto } from './dtos/user.dto';
 import { TransactionInterceptor } from '../common/interceptors/transaction.interceptor';
 import { TransactionManager } from '../common/decorators/transaction-manager.decorator';
 import { EntityManager } from 'typeorm';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { randomBytes } from 'crypto';
+import { OAuthStateGuard } from 'src/common/guard/oauth-state.guard';
+import { LoginUserDto } from './dtos/login-user.dto';
 
-@Controller('user')
+@Controller()
 @Serialize(UserDto)
 export class UserController {
   constructor(
-    private userService: UserService,
     private authService: AuthService,
     private config: ConfigService,
   ) {}
 
   @Post('/test')
-  test(@Session() session: any) {
+  @UseInterceptors(TransactionInterceptor)
+  test(
+    @Session() session: any,
+    @TransactionManager() transactionManager: EntityManager,
+  ) {
     session.user = { id: 252 };
+    console.log('transactionManager', transactionManager);
     return 'test';
   }
 
-  @Get('/login')
-  login(@Res() res: Response) {
-    let url = 'https://accounts.google.com/o/oauth2/v2/auth';
-    url += `?client_id=${this.config.get<string>('GOOGLE_CLIENT_ID')}`;
-    url += `&redirect_uri=${this.config.get<string>('GOOGLE_SIGNUP_REDIRECT_URI')}`;
-    url += '&response_type=code';
-    //   url += "&scope=email profile";
-    url += '&scope=email profile';
-    console.log('login');
+  @Post('/test2')
+  test2(
+    @Session() session: any,
+    @TransactionManager() transactionManager: EntityManager,
+  ) {
+    session.user = null;
+    console.log('transactionManager', transactionManager);
+    return 'test2';
+  }
+
+  ///////////////////////////////
+
+  @Get('/signin-google')
+  getSigninGoogle(@Res() res: Response) {
+    const url =
+      'https://accounts.google.com/o/oauth2/v2/auth' +
+      `?client_id=${this.config.get<string>('GOOGLE_CLIENT_ID')}` +
+      `&redirect_uri=${this.config.get<string>('GOOGLE_REDIRECT_URI')}` +
+      '&response_type=code' +
+      '&scope=email profile';
+
     return res.redirect(url);
   }
 
-  @Get('/signup/redirect')
-  logintest(@Req() req: Request) {
-    const { code } = req.query;
-    console.log(`code: ${code}`);
+  @Get('/signin-google/callback')
+  @UseInterceptors(TransactionInterceptor)
+  async getSigninGoogleCallback(
+    @Query('code') code: string,
+    @Session() session: any,
+    @TransactionManager() transactionManager: EntityManager,
+  ) {
+    return await this.authService
+      .signinGoogle(transactionManager, code)
+      .then(({ user, tokenData }) => {
+        session = {
+          ...session,
+          user: {
+            id: user.id,
+            // user_id: user.user_id,
+            name: user.name,
+            nickname: user.nickname,
+            email: user.email,
+            profile_image: user.profile_image,
+          },
+          oauth: {
+            id_token: tokenData.id_token,
+            access_token: tokenData.access_token,
+          },
+        };
+
+        return user;
+      });
   }
 
-  @Post('/signin-naver')
-  signinNaver(@Body() body: CreateUserDto, @Session() session: any) {
-    return this.authService.signin(body.user_id, body.password).then((user) => {
-      session.user = {
-        id: user.id,
-        user_id: user.user_id,
-        user_id_type: user.user_id_type,
-        name: user.name,
-        nickname: user.nickname,
-        email: user.email,
-        profile_image: user.profile_image,
-      };
-      return user;
-    });
+  @Get('/signin-naver')
+  getSigninNaver(@Res() res: Response, @Session() session: any) {
+    const state = randomBytes(8).toString('hex');
+    session.stateCheck = {
+      state,
+      createAt: new Date(),
+    };
+
+    const url =
+      'https://nid.naver.com/oauth2.0/authorize' +
+      `?client_id=${this.config.get<string>('NAVER_CLIENT_ID')}` +
+      `&redirect_uri=${this.config.get<string>('NAVER_REDIRECT_URI')}` +
+      '&response_type=code' +
+      `&state=${state}`;
+
+    return res.redirect(url);
   }
 
-  @Post('/signin-google')
-  signinGoogle(@Body() body: CreateUserDto, @Session() session: any) {
-    return this.authService.signin(body.user_id, body.password).then((user) => {
-      session.user = {
-        id: user.id,
-        user_id: user.user_id,
-        user_id_type: user.user_id_type,
-        name: user.name,
-        nickname: user.nickname,
-        email: user.email,
-        profile_image: user.profile_image,
-      };
-      return user;
-    });
+  @Get('/signin-naver/callback')
+  @UseGuards(OAuthStateGuard)
+  @UseInterceptors(TransactionInterceptor)
+  async getSigninNaverCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Session() session: any,
+    @TransactionManager() transactionManager: EntityManager,
+  ) {
+    return await this.authService
+      .signinNaver(transactionManager, code, state)
+      .then(({ user, tokenData }) => {
+        session = {
+          ...session,
+          user: {
+            id: user.id,
+            // user_id: user.user_id,
+            name: user.name,
+            nickname: user.nickname,
+            email: user.email,
+            profile_image: user.profile_image,
+          },
+          oauth: {
+            refresh_token: tokenData.refresh_token,
+            access_token: tokenData.access_token,
+          },
+        };
+
+        if (session.hasOwnProperty('stateCheck')) {
+          delete session['stateCheck'];
+        }
+
+        return user;
+      });
   }
 
   @Post('/signout')
-  signOut(@Session() session: any) {
+  postSignOut(@Session() session: any) {
     session.user = null;
+    session.oauth = null;
     return null;
   }
 
   @Post('/signin')
-  signin(@Body() body: CreateUserDto, @Session() session: any) {
-    return this.authService.signin(body.user_id, body.password).then((user) => {
-      session.user = {
-        id: user.id,
-        user_id: user.user_id,
-        user_id_type: user.user_id_type,
-        name: user.name,
-        nickname: user.nickname,
-        email: user.email,
-        profile_image: user.profile_image,
-      };
-      return user;
-    });
+  async postSignin(@Body() body: LoginUserDto, @Session() session: any) {
+    return await this.authService
+      .signin(body.user_id, body.password)
+      .then((user) => {
+        session.user = {
+          id: user.id,
+          // user_id: user.user_id,
+          name: user.name,
+          nickname: user.nickname,
+          email: user.email,
+          profile_image: user.profile_image,
+        };
+        return user;
+      });
   }
 
   @Post('/signup')
   @UseInterceptors(TransactionInterceptor)
-  async createUser(
+  async postCreateUser(
     @Body() body: CreateUserDto,
     @TransactionManager() transactionManager: EntityManager,
   ) {
-    return this.authService.signup(transactionManager, body);
+    return await this.authService.signup(transactionManager, body);
   }
 }
