@@ -11,15 +11,15 @@ export class NaverOAuthService {
   ) {}
 
   async getNaverUserInfo(authCode: string, authState: string) {
-    const client_id = this.config.get<string>('NAVER_CLIENT_ID');
-    const client_secret = this.config.get<string>('NAVER_CLIENT_SECRET');
-    const redirect_uri = this.config.get<string>('NAVER_REDIRECT_URI');
+    const client_id = this.config.get<string>('naver.clientId');
+    const client_secret = this.config.get<string>('naver.clientSecret');
+    const redirect_uri = this.config.get<string>('naver.redirectUrl');
 
     try {
       // 교환할 토큰 요청
       const tokenData = await lastValueFrom(
         this.httpService
-          .get(this.config.get<string>('NAVER_TOKEN_URL'), {
+          .get(this.config.get<string>('naver.tokenUrl'), {
             headers: {
               'X-Naver-Client-Id': client_id,
               'X-Naver-Client-Secret': client_secret,
@@ -41,7 +41,7 @@ export class NaverOAuthService {
       // 사용자 정보 요청
       const naverUserInfo = await lastValueFrom(
         this.httpService
-          .get(this.config.get<string>('NAVER_USERINFO_URL'), {
+          .get(this.config.get<string>('naver.userInfoUrl'), {
             headers: { Authorization: `Bearer ${accessToken}` },
           })
           .pipe(map((response) => response.data.response)),

@@ -34,8 +34,8 @@ export class UserController {
   getSigninGoogle(@Res() res: Response) {
     const url =
       'https://accounts.google.com/o/oauth2/v2/auth' +
-      `?client_id=${this.config.get<string>('GOOGLE_CLIENT_ID')}` +
-      `&redirect_uri=${this.config.get<string>('GOOGLE_REDIRECT_URI')}` +
+      `?client_id=${this.config.get<string>('google.clientId')}` +
+      `&redirect_uri=${this.config.get<string>('google.redirectUrl')}` +
       '&response_type=code' +
       '&scope=email profile';
 
@@ -82,8 +82,8 @@ export class UserController {
 
     const url =
       'https://nid.naver.com/oauth2.0/authorize' +
-      `?client_id=${this.config.get<string>('NAVER_CLIENT_ID')}` +
-      `&redirect_uri=${this.config.get<string>('NAVER_REDIRECT_URI')}` +
+      `?client_id=${this.config.get<string>('naver.clientId')}` +
+      `&redirect_uri=${this.config.get<string>('naver.redirectUrl')}` +
       '&response_type=code' +
       `&state=${state}`;
 

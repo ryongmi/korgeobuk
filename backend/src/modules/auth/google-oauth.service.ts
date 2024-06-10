@@ -15,11 +15,11 @@ export class GoogleOAuthService {
       // 교환할 토큰 요청
       const tokenData = await lastValueFrom(
         this.httpService
-          .post(this.config.get<string>('GOOGLE_TOKEN_URL'), {
+          .post(this.config.get<string>('google.tokenUrl'), {
             code: authCode,
-            client_id: this.config.get<string>('GOOGLE_CLIENT_ID'),
-            client_secret: this.config.get<string>('GOOGLE_CLIENT_SECRET'),
-            redirect_uri: this.config.get<string>('GOOGLE_REDIRECT_URI'),
+            client_id: this.config.get<string>('google.clientId'),
+            client_secret: this.config.get<string>('google.clientSecret'),
+            redirect_uri: this.config.get<string>('google.redirectUrl'),
             grant_type: 'authorization_code',
           })
           .pipe(map((response) => response.data)),
@@ -30,7 +30,7 @@ export class GoogleOAuthService {
       // 사용자 정보 요청
       const googleUserInfo = await lastValueFrom(
         this.httpService
-          .get(this.config.get<string>('GOOGLE_USERINFO_URL'), {
+          .get(this.config.get<string>('google.userInfoUrl'), {
             headers: { Authorization: `Bearer ${accessToken}` },
           })
           .pipe(map((response) => response.data)),
