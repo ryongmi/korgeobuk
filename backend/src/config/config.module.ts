@@ -9,7 +9,7 @@ import { googleConfig } from './google';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [`.env.${process.env.NODE_ENV}.local`],
+      // envFilePath: [`.env.${process.env.NODE_ENV}.local`],
       load: [defaultConfig, databaseConfig, googleConfig, naverConfig],
     }),
   ],
