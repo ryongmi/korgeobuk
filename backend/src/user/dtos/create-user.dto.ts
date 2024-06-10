@@ -5,11 +5,6 @@ export class CreateUserDto {
   user_id: string;
 
   @IsString()
-  @IsOptional()
-  user_id_type: string;
-
-  @IsString()
-  @IsOptional()
   password: string;
 
   @IsString()
