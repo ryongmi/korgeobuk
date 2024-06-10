@@ -3,10 +3,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { UserService } from './user.service';
+import { UserService } from '../user/user.service';
 import { scrypt as _scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
-import { User } from './entitys/user.entity';
+import { User } from '../../entities/user.entity';
 import { EntityManager } from 'typeorm';
 import { GoogleOAuthService } from './google-oauth.service';
 import { NaverOAuthService } from './naver-oauth.service';

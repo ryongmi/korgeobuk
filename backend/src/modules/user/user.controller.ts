@@ -10,16 +10,16 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { AuthService } from './auth.service';
-import { Serialize } from '../common/interceptors/serialize.interceptor';
+import { AuthService } from '../auth/auth.service';
+import { Serialize } from '../../common/interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
-import { TransactionInterceptor } from '../common/interceptors/transaction.interceptor';
-import { TransactionManager } from '../common/decorators/transaction-manager.decorator';
+import { TransactionInterceptor } from '../../common/interceptors/transaction.interceptor';
+import { TransactionManager } from '../../common/decorators/transaction-manager.decorator';
 import { EntityManager } from 'typeorm';
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
-import { OAuthStateGuard } from 'src/common/guard/oauth-state.guard';
+import { OAuthStateGuard } from './guards/oauth-state.guard';
 import { LoginUserDto } from './dtos/login-user.dto';
 
 @Controller()
@@ -29,29 +29,6 @@ export class UserController {
     private authService: AuthService,
     private config: ConfigService,
   ) {}
-
-  @Post('/test')
-  @UseInterceptors(TransactionInterceptor)
-  test(
-    @Session() session: any,
-    @TransactionManager() transactionManager: EntityManager,
-  ) {
-    session.user = { id: 252 };
-    console.log('transactionManager', transactionManager);
-    return 'test';
-  }
-
-  @Post('/test2')
-  test2(
-    @Session() session: any,
-    @TransactionManager() transactionManager: EntityManager,
-  ) {
-    session.user = null;
-    console.log('transactionManager', transactionManager);
-    return 'test2';
-  }
-
-  ///////////////////////////////
 
   @Get('/signin-google')
   getSigninGoogle(@Res() res: Response) {

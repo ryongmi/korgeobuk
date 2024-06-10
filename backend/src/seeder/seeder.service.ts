@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { UserService } from 'src/user/user.service';
-import { AuthService } from 'src/user/auth.service';
+import { UserService } from '../modules/user/user.service';
+import { AuthService } from '../modules/auth/auth.service';
 
 @Injectable()
 export class SeederService {

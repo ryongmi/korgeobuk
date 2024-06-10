@@ -1,5 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { isWithinMinutes } from '../utils/date-diff-checker';
+import { isWithinMinutes } from '../../../common/utils/date-diff-checker';
 
 @Injectable()
 export class OAuthStateGuard implements CanActivate {

@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
-import { User } from './entitys/user.entity';
+import { User } from '../../entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthService } from './auth.service';
-import { Role } from './entitys/role.entity';
-import { User_Role } from './entitys/user-role.entity';
+import { AuthService } from '../auth/auth.service';
+import { Role } from '../../entities/role.entity';
+import { User_Role } from '../../entities/user-role.entity';
 import { HttpModule } from '@nestjs/axios';
-import { GoogleOAuthService } from './google-oauth.service';
-import { NaverOAuthService } from './naver-oauth.service';
+import { GoogleOAuthService } from '../auth/google-oauth.service';
+import { NaverOAuthService } from '../auth/naver-oauth.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Role, User_Role]), HttpModule],

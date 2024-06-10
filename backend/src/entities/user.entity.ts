@@ -1,5 +1,5 @@
 import { Entity, Column } from 'typeorm';
-import { BaseEntityUUID } from '../../common/entitys/base.entity';
+import { BaseEntityUUID } from '../common/entities/base.entity';
 
 @Entity()
 export class User extends BaseEntityUUID {
