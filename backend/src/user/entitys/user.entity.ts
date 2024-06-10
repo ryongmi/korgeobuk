@@ -1,54 +1,39 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-  Unique,
-} from 'typeorm';
+import { Entity, Column } from 'typeorm';
+import { BaseEntityUUID } from '../../common/entitys/base.entity';
 
 @Entity()
-@Unique(['user_id', 'user_id_type'])
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
+export class User extends BaseEntityUUID {
+  @Column({ type: 'varchar', length: 255, unique: true, nullable: true })
   user_id: string; // 회원가입한 사람들 id
 
-  @Column({
-    length: 1,
-    type: 'char',
-    default: 'K',
-  })
-  user_id_type: string; // OAuth, 회원가입 구분용 / G : 구글, N : 네이버, K : 회원가입
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  oauth_id: string; // Oauth id
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   password: string;
 
   @Column({
+    type: 'varchar',
     length: 15,
   })
   name: string;
 
   @Column({
+    type: 'varchar',
     length: 15,
   })
   nickname: string;
 
-  @Column({ unique: true })
+  @Column({ type: 'varchar', length: 255, unique: true })
   email: string; // 이메일은 무조건 한번만 가입가능하게
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 2048, nullable: true })
   profile_image: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
-  created_at: Date;
-
-  @UpdateDateColumn({ type: 'timestamp' })
-  updated_at: Date;
-
-  @DeleteDateColumn({ type: 'timestamp' })
-  deleted_at: Date;
+  @Column({
+    type: 'timestamp',
+    precision: 6,
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  }) // 현재 시간으로 기본값을 설정
+  last_login: Date;
 }

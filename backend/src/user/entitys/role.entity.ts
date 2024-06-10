@@ -1,11 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntityIncrement } from 'src/common/entitys/base.entity';
+import { Entity, Column } from 'typeorm';
 
 @Entity()
-export class Role {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class Role extends BaseEntityIncrement {
   @Column({
+    type: 'varchar',
     length: 15,
   })
   name: string;
