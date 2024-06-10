@@ -40,7 +40,6 @@ export class SeederService {
       const existingUser = await this.userService.findByUserIdOREmail(
         user.user_id,
         user.email,
-        'K',
       );
 
       if (existingUser.length === 0) {
