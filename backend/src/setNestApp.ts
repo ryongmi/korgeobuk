@@ -1,5 +1,5 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { HttpExceptionFilter } from './common/filter/http-exception.filter';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { sessionConfig } from './database/session';
 import { SeederService } from './seeder/seeder.service';
 import { LoggingInterceptor } from './common/interceptors/logger.interceptor';

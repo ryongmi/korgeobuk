@@ -21,8 +21,16 @@ import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
 import { OAuthStateGuard } from './guards/oauth-state.guard';
 import { LoginUserDto } from './dtos/login-user.dto';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
-@Controller()
+@ApiTags('auth')
+@Controller('auth')
 @Serialize(UserDto)
 export class UserController {
   constructor(
@@ -31,6 +39,8 @@ export class UserController {
   ) {}
 
   @Get('/signin-google')
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiResponse({ status: 200, description: 'Successful retrieval of users.' })
   getSigninGoogle(@Res() res: Response) {
     const url =
       'https://accounts.google.com/o/oauth2/v2/auth' +
@@ -43,6 +53,14 @@ export class UserController {
   }
 
   @Get('/signin-google/callback')
+  @ApiOperation({ summary: 'Get users with optional query parameters' })
+  @ApiQuery({
+    name: 'code',
+    required: true,
+    type: String,
+    description: 'Filter users by age',
+    example: 'defaultName',
+  })
   @UseInterceptors(TransactionInterceptor)
   async getSigninGoogleCallback(
     @Query('code') code: string,
@@ -91,6 +109,24 @@ export class UserController {
   }
 
   @Get('/signin-naver/callback')
+  @ApiOperation({ summary: 'Get users with optional query parameters' })
+  @ApiQuery({
+    name: 'code',
+    required: true,
+    type: String,
+    description: 'Filter users by age',
+  })
+  @ApiQuery({
+    name: 'state',
+    required: true,
+    type: String,
+    description: 'Filter users by name',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'User created successfully.',
+    type: UserDto,
+  })
   @UseGuards(OAuthStateGuard)
   @UseInterceptors(TransactionInterceptor)
   async getSigninNaverCallback(
@@ -134,6 +170,9 @@ export class UserController {
   }
 
   @Post('/signin')
+  @ApiOperation({ summary: 'Create user' })
+  @ApiResponse({ status: 201, description: 'User created successfully.' })
+  @ApiBody({ type: LoginUserDto })
   async postSignin(@Body() body: LoginUserDto, @Session() session: any) {
     return await this.authService
       .signin(body.user_id, body.password)
@@ -151,6 +190,13 @@ export class UserController {
   }
 
   @Post('/signup')
+  @ApiOperation({ summary: 'Create user' })
+  @ApiResponse({
+    status: 201,
+    description: 'User created successfully.',
+    type: UserDto,
+  })
+  @ApiBody({ type: CreateUserDto })
   @UseInterceptors(TransactionInterceptor)
   async postCreateUser(
     @Body() body: CreateUserDto,
