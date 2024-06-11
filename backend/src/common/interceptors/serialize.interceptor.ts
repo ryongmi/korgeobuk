@@ -32,6 +32,7 @@ export class SerializerInterceptor implements NestInterceptor {
         console.log('response DTO 적용');
         return {
           data: plainToClass(this.dto, data, {
+            // Convert instance to plain object and then back to class to trigger @Expose() decorators
             excludeExtraneousValues: true,
           }),
         };
