@@ -37,8 +37,6 @@ services:
       - 9229:9229 # Node.js 디버깅 포트
     env_file:
       - ./backend/.env.development.local
-    environment:
-      - NODE_ENV=development
     depends_on:
       - mysqldb
   frontend:

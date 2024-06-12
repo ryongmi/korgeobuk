@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
-import { CustomConfigModule } from './config/config.module';
+import { AppConfigModule } from './config/app-config.module';
 import { DatabaseModule } from './database/database.module';
 import { SeederModule } from './seeder/seeder.module';
 
 @Module({
   imports: [
-    CustomConfigModule,
+    AppConfigModule,
     DatabaseModule,
     UserModule,
     SeederModule,

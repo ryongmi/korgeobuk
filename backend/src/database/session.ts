@@ -3,16 +3,16 @@ const MySQLStore = require('express-mysql-session')(session);
 
 const sessionStore = new MySQLStore({
   // MySQLStore 설정
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT),
-  user: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.MYSQL_HOST,
+  port: parseInt(process.env.MYSQL_PORT),
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE,
 });
 
 export const sessionConfig = session({
-  secret: 'korgeobug-secret',
-  name: 'korgeobug-session',
+  secret: process.env.SESSION_SECRET,
+  name: process.env.SESSION_NAME,
   store: sessionStore,
   resave: false,
   saveUninitialized: true,
