@@ -16,14 +16,14 @@ export class SeederService {
   async seed() {
     const users = [
       {
-        user_id: 'testUser',
+        userId: 'testUser',
         password: 'testUser',
         name: 'testUser',
         nickname: 'user',
         email: 'user@example.com',
       },
       {
-        user_id: 'testAdmin',
+        userId: 'testAdmin',
         password: 'testAdmin',
         name: 'testAdmin',
         nickname: 'admin',
@@ -38,7 +38,7 @@ export class SeederService {
       //   where: { email: user.email },
       // });
       const existingUser = await this.userService.findByUserIdOREmail(
-        user.user_id,
+        user.userId,
         user.email,
       );
 

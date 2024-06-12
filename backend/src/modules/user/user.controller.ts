@@ -78,7 +78,7 @@ export class UserController {
             name: user.name,
             nickname: user.nickname,
             email: user.email,
-            profile_image: user.profile_image,
+            profileImage: user.profileImage,
           },
           oauth: {
             id_token: tokenData.id_token,
@@ -146,7 +146,7 @@ export class UserController {
             name: user.name,
             nickname: user.nickname,
             email: user.email,
-            profile_image: user.profile_image,
+            profileImage: user.profileImage,
           },
           oauth: {
             refresh_token: tokenData.refresh_token,
@@ -175,7 +175,7 @@ export class UserController {
   @ApiBody({ type: LoginUserDto })
   async postSignin(@Body() body: LoginUserDto, @Session() session: any) {
     return await this.authService
-      .signin(body.user_id, body.password)
+      .signin(body.userId, body.password)
       .then((user) => {
         session.user = {
           id: user.id,
@@ -183,7 +183,7 @@ export class UserController {
           name: user.name,
           nickname: user.nickname,
           email: user.email,
-          profile_image: user.profile_image,
+          profileImage: user.profileImage,
         };
         return user;
       });

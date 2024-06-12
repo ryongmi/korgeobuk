@@ -7,7 +7,7 @@ export class LoginUserDto {
     description: 'The ID of the user',
   })
   @IsString()
-  user_id: string;
+  userId: string;
 
   @ApiProperty({
     example: 'userPw@@1234',

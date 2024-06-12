@@ -1,10 +1,10 @@
 import { Entity, Column, PrimaryColumn } from 'typeorm';
 
 @Entity()
-export class User_Role {
+export class UserRole {
   @PrimaryColumn('uuid')
-  user_id: string; // 회원가입한 유저 id
+  userId: string; // 회원가입한 유저 id
 
   @Column({ type: 'int', default: 1 })
-  role_id: number; // 역활 id
+  roleId: number; // 역활 id
 }

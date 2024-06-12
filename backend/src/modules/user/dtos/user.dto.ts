@@ -8,7 +8,7 @@ export class UserDto {
     description: 'The ID of the user',
   })
   @Expose()
-  user_id: string;
+  userId: string;
 
   @ApiProperty({ example: 'user', description: 'The ID of the user' })
   @Expose()
@@ -20,5 +20,5 @@ export class UserDto {
 
   @ApiProperty({ example: 'user@email.com', description: 'The ID of the user' })
   @Expose()
-  profile_image: string;
+  profileImage: string;
 }

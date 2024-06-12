@@ -33,26 +33,26 @@ export class AuthService {
     const userInfo = await this.userService.findByEmail(naverUserInfo.email);
     if (userInfo) {
       // 이메일이 이미 존재하는 경우 계정 병합
-      if (!userInfo.oauth_id) {
+      if (!userInfo.oauthId) {
         // 처음 병합할 경우 필요한 정보 업데이트
-        userInfo.oauth_id = naverUserInfo.id;
+        userInfo.oauthId = naverUserInfo.id;
         userInfo.name ||= naverUserInfo.name;
         userInfo.nickname ||= naverUserInfo.nickname;
-        userInfo.profile_image ||= naverUserInfo.profile_image;
+        userInfo.profileImage ||= naverUserInfo.profile_image;
       }
 
       // 마지막 접속일 업데이트
-      userInfo.last_login = new Date();
+      userInfo.lastLogin = new Date();
 
       user = await this.userService.updateUser(userInfo);
     } else {
       // 이메일이 존재하지 않는 경우 새 사용자 생성
       user = await this.userService.createUser(transactionManager, {
-        oauth_id: naverUserInfo.id,
+        oauthId: naverUserInfo.id,
         name: naverUserInfo.name,
         nickname: naverUserInfo.nickname,
         email: naverUserInfo.email,
-        profile_image: naverUserInfo.profile_image,
+        profileImage: naverUserInfo.profile_image,
       });
     }
 
@@ -68,26 +68,26 @@ export class AuthService {
 
     if (userInfo) {
       // 이메일이 이미 존재하는 경우 계정 병합
-      if (!userInfo.oauth_id) {
+      if (!userInfo.oauthId) {
         // 처음 병합할 경우 필요한 정보 업데이트
-        userInfo.oauth_id = googleUserInfo.id;
+        userInfo.oauthId = googleUserInfo.id;
         userInfo.name ||= googleUserInfo.name;
         userInfo.nickname ||= googleUserInfo.name;
-        userInfo.profile_image ||= googleUserInfo.picture;
+        userInfo.profileImage ||= googleUserInfo.picture;
       }
 
       // 마지막 접속일 업데이트
-      userInfo.last_login = new Date();
+      userInfo.lastLogin = new Date();
 
       user = await this.userService.updateUser(userInfo);
     } else {
       // 이메일이 존재하지 않는 경우 새 사용자 생성
       user = await this.userService.createUser(transactionManager, {
-        oauth_id: googleUserInfo.id,
+        oauthId: googleUserInfo.id,
         name: googleUserInfo.name,
         nickname: googleUserInfo.name,
         email: googleUserInfo.email,
-        profile_image: googleUserInfo.picture,
+        profileImage: googleUserInfo.picture,
       });
     }
 
@@ -117,7 +117,7 @@ export class AuthService {
 
   async signup(transactionManager: EntityManager, attrs: Partial<User>) {
     const users = await this.userService.findByUserIdOREmail(
-      attrs.user_id,
+      attrs.userId,
       attrs.email,
     );
 
