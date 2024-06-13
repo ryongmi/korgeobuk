@@ -10,7 +10,7 @@ export class NaverOAuthService {
     private readonly config: ConfigService,
   ) {}
 
-  async getNaverUserInfo(authCode: string, authState: string) {
+  async getNaverUserInfo(code: string, state: string) {
     const client_id = this.config.get<string>('naver.clientId');
     const client_secret = this.config.get<string>('naver.clientSecret');
     const redirect_uri = this.config.get<string>('naver.redirectUrl');
@@ -28,8 +28,8 @@ export class NaverOAuthService {
               client_id,
               client_secret,
               redirect_uri,
-              code: authCode,
-              state: authState,
+              code,
+              state,
               grant_type: 'authorization_code',
             },
           })

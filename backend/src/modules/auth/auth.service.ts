@@ -23,28 +23,27 @@ export class AuthService {
 
   async signinNaver(
     transactionManager: EntityManager,
-    authCode: string,
-    authState: string,
+    code: string,
+    state: string,
   ) {
     const { tokenData, naverUserInfo } =
-      await this.naverOAuthService.getNaverUserInfo(authCode, authState);
+      await this.naverOAuthService.getNaverUserInfo(code, state);
 
-    let user;
-    const userInfo = await this.userService.findByEmail(naverUserInfo.email);
-    if (userInfo) {
+    let user = await this.userService.findByEmail(naverUserInfo.email);
+    if (user) {
       // 이메일이 이미 존재하는 경우 계정 병합
-      if (!userInfo.oauthId) {
+      if (!user.oauthId) {
         // 처음 병합할 경우 필요한 정보 업데이트
-        userInfo.oauthId = naverUserInfo.id;
-        userInfo.name ||= naverUserInfo.name;
-        userInfo.nickname ||= naverUserInfo.nickname;
-        userInfo.profileImage ||= naverUserInfo.profile_image;
+        user.oauthId = naverUserInfo.id;
+        user.name ||= naverUserInfo.name;
+        user.nickname ||= naverUserInfo.nickname;
+        user.profileImage ||= naverUserInfo.profile_image;
       }
 
       // 마지막 접속일 업데이트
-      userInfo.lastLogin = new Date();
+      user.lastLogin = new Date();
 
-      user = await this.userService.updateUser(userInfo);
+      user = await this.userService.updateUser(user);
     } else {
       // 이메일이 존재하지 않는 경우 새 사용자 생성
       user = await this.userService.createUser(transactionManager, {
@@ -59,27 +58,26 @@ export class AuthService {
     return { user, tokenData };
   }
 
-  async signinGoogle(transactionManager: EntityManager, authCode: string) {
+  async signinGoogle(transactionManager: EntityManager, code: string) {
     const { tokenData, googleUserInfo } =
-      await this.googleOAuthService.getGoogleUserInfo(authCode);
+      await this.googleOAuthService.getGoogleUserInfo(code);
 
-    const userInfo = await this.userService.findByEmail(googleUserInfo.email);
-    let user;
+    let user = await this.userService.findByEmail(googleUserInfo.email);
 
-    if (userInfo) {
+    if (user) {
       // 이메일이 이미 존재하는 경우 계정 병합
-      if (!userInfo.oauthId) {
+      if (!user.oauthId) {
         // 처음 병합할 경우 필요한 정보 업데이트
-        userInfo.oauthId = googleUserInfo.id;
-        userInfo.name ||= googleUserInfo.name;
-        userInfo.nickname ||= googleUserInfo.name;
-        userInfo.profileImage ||= googleUserInfo.picture;
+        user.oauthId = googleUserInfo.id;
+        user.name ||= googleUserInfo.name;
+        user.nickname ||= googleUserInfo.name;
+        user.profileImage ||= googleUserInfo.picture;
       }
 
       // 마지막 접속일 업데이트
-      userInfo.lastLogin = new Date();
+      user.lastLogin = new Date();
 
-      user = await this.userService.updateUser(userInfo);
+      user = await this.userService.updateUser(user);
     } else {
       // 이메일이 존재하지 않는 경우 새 사용자 생성
       user = await this.userService.createUser(transactionManager, {

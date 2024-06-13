@@ -10,13 +10,13 @@ export class GoogleOAuthService {
     private readonly config: ConfigService,
   ) {}
 
-  async getGoogleUserInfo(authCode: string) {
+  async getGoogleUserInfo(code: string) {
     try {
       // 교환할 토큰 요청
       const tokenData = await lastValueFrom(
         this.httpService
           .post(this.config.get<string>('google.tokenUrl'), {
-            code: authCode,
+            code,
             client_id: this.config.get<string>('google.clientId'),
             client_secret: this.config.get<string>('google.clientSecret'),
             redirect_uri: this.config.get<string>('google.redirectUrl'),
