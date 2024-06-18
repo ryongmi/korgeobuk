@@ -38,13 +38,24 @@ export class HttpExceptionFilter implements ExceptionFilter {
       logMessage += ` \nBody: ${requestBody}`;
     }
 
-    this.logger.error(logMessage);
-    this.logger.error(error);
+    this.logger.error('logMessage', logMessage);
+    this.logger.error('error', error);
 
     response.status(status).json({
       statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: url,
+      error: 'Bad Request',
+      message: 'Invalid input data',
+      // timestamp: new Date().toISOString(),
+      // path: url,
     });
+
+    // response.status(status).json({
+    //   status: 'error',
+    //   message: exception.message,
+    //   error: {
+    //     code: status,
+    //     details: exception.getResponse(),
+    //   },
+    // });
   }
 }

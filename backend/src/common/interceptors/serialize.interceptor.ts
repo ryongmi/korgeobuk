@@ -23,6 +23,7 @@ export class SerializerInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const req = context.switchToHttp().getRequest();
+    const statusCode = context.switchToHttp().getResponse().statusCode;
 
     console.log('body', req.body);
     console.log('session', req.session);
@@ -31,6 +32,9 @@ export class SerializerInterceptor implements NestInterceptor {
       map((data: any) => {
         console.log('response DTO 적용');
         return {
+          statusCode,
+          // message: "Request successful",
+          isLogin: req.session?.user == null ? false : true,
           data: plainToClass(this.dto, data, {
             // Convert instance to plain object and then back to class to trigger @Expose() decorators
             excludeExtraneousValues: true,
