@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Post,
   Query,
   Res,
@@ -38,10 +39,10 @@ export class UserController {
     private config: ConfigService,
   ) {}
 
-  @Get('/signin-google')
+  @Get('/login-google')
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Successful retrieval of users.' })
-  getSigninGoogle(@Res() res: Response) {
+  getLoginGoogle(@Res() res: Response) {
     const url =
       'https://accounts.google.com/o/oauth2/v2/auth' +
       `?client_id=${this.config.get<string>('google.clientId')}` +
@@ -52,7 +53,7 @@ export class UserController {
     return res.redirect(url);
   }
 
-  @Get('/signin-google/callback')
+  @Get('/login-google/callback')
   @ApiOperation({ summary: 'Get users with optional query parameters' })
   @ApiQuery({
     name: 'code',
@@ -62,36 +63,33 @@ export class UserController {
     example: 'defaultName',
   })
   @UseInterceptors(TransactionInterceptor)
-  async getSigninGoogleCallback(
+  async getLoginGoogleCallback(
     @Query('code') code: string,
-    @Session() session: any,
+    @Session() session: Record<string, any>,
     @TransactionManager() transactionManager: EntityManager,
   ) {
     return await this.authService
-      .signinGoogle(transactionManager, code)
+      .loginGoogle(transactionManager, code)
       .then(({ user, tokenData }) => {
-        session = {
-          ...session,
-          user: {
-            id: user.id,
-            // user_id: user.user_id,
-            name: user.name,
-            nickname: user.nickname,
-            email: user.email,
-            profileImage: user.profileImage,
-          },
-          oauth: {
-            id_token: tokenData.id_token,
-            access_token: tokenData.access_token,
-          },
+        session.user = {
+          id: user.id,
+          // user_id: user.user_id,
+          name: user.name,
+          nickname: user.nickname,
+          email: user.email,
+          profileImage: user.profileImage,
+        };
+        session.oauth = {
+          id_token: tokenData.id_token,
+          access_token: tokenData.access_token,
         };
 
         return user;
       });
   }
 
-  @Get('/signin-naver')
-  getSigninNaver(@Res() res: Response, @Session() session: any) {
+  @Get('/login-naver')
+  getLoginNaver(@Res() res: Response, @Session() session: Record<string, any>) {
     const state = randomBytes(8).toString('hex');
     session.stateCheck = {
       state,
@@ -108,7 +106,7 @@ export class UserController {
     return res.redirect(url);
   }
 
-  @Get('/signin-naver/callback')
+  @Get('/login-naver/callback')
   @ApiOperation({ summary: 'Get users with optional query parameters' })
   @ApiQuery({
     name: 'code',
@@ -129,29 +127,26 @@ export class UserController {
   })
   @UseGuards(OAuthStateGuard)
   @UseInterceptors(TransactionInterceptor)
-  async getSigninNaverCallback(
+  async getLoginNaverCallback(
     @Query('code') code: string,
     @Query('state') state: string,
-    @Session() session: any,
+    @Session() session: Record<string, any>,
     @TransactionManager() transactionManager: EntityManager,
   ) {
     return await this.authService
-      .signinNaver(transactionManager, code, state)
+      .loginNaver(transactionManager, code, state)
       .then(({ user, tokenData }) => {
-        session = {
-          ...session,
-          user: {
-            id: user.id,
-            // user_id: user.user_id,
-            name: user.name,
-            nickname: user.nickname,
-            email: user.email,
-            profileImage: user.profileImage,
-          },
-          oauth: {
-            refresh_token: tokenData.refresh_token,
-            access_token: tokenData.access_token,
-          },
+        session.user = {
+          id: user.id,
+          // user_id: user.user_id,
+          name: user.name,
+          nickname: user.nickname,
+          email: user.email,
+          profileImage: user.profileImage,
+        };
+        session.oauth = {
+          refresh_token: tokenData.refresh_token,
+          access_token: tokenData.access_token,
         };
 
         if (session.hasOwnProperty('stateCheck')) {
@@ -162,20 +157,30 @@ export class UserController {
       });
   }
 
-  @Post('/signout')
-  postSignOut(@Session() session: any) {
-    session.user = null;
-    session.oauth = null;
+  @Post('/logout')
+  @HttpCode(200)
+  postLogout(@Session() session: Record<string, any>) {
+    if (session.hasOwnProperty('user')) {
+      delete session['user'];
+    }
+    if (session.hasOwnProperty('oauth')) {
+      delete session['oauth'];
+    }
+
     return null;
   }
 
-  @Post('/signin')
+  @Post('/login')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Create user' })
   @ApiResponse({ status: 201, description: 'User created successfully.' })
   @ApiBody({ type: LoginUserDto })
-  async postSignin(@Body() body: LoginUserDto, @Session() session: any) {
+  async postLogin(
+    @Body() body: LoginUserDto,
+    @Session() session: Record<string, any>,
+  ) {
     return await this.authService
-      .signin(body.userId, body.password)
+      .login(body.userId, body.password)
       .then((user) => {
         session.user = {
           id: user.id,
@@ -185,11 +190,13 @@ export class UserController {
           email: user.email,
           profileImage: user.profileImage,
         };
+
         return user;
       });
   }
 
   @Post('/signup')
+  @HttpCode(201)
   @ApiOperation({ summary: 'Create user' })
   @ApiResponse({
     status: 201,

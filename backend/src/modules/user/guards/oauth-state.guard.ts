@@ -1,5 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { isWithinMinutes } from '../../../common/utils/date-diff-checker';
+import { AuthException } from 'src/exception';
 
 @Injectable()
 export class OAuthStateGuard implements CanActivate {
@@ -7,7 +8,8 @@ export class OAuthStateGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     if (!request.session.hasOwnProperty('stateCheck')) {
       // stateCheck이 없으면 요청 반환
-      return false;
+
+      throw AuthException.authStateNotFound();
     }
 
     const { state: callbackState } = request.query;
@@ -21,7 +23,7 @@ export class OAuthStateGuard implements CanActivate {
     ) {
       // state값이 다르거나, 5분 이내 요청이 아닐경우 요청 반환
       delete request.session['stateCheck'];
-      return false;
+      throw AuthException.authStateNotExist();
     }
 
     return true;

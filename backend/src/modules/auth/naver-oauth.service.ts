@@ -1,7 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { lastValueFrom, map } from 'rxjs';
+import { AuthException } from '../../exception';
 
 @Injectable()
 export class NaverOAuthService {
@@ -49,17 +50,18 @@ export class NaverOAuthService {
 
       return { tokenData, naverUserInfo };
     } catch (error) {
-      if (error.isAxiosError) {
-        // AxiosError를 확인하고 처리
-        throw new InternalServerErrorException(
-          'Failed to fetch user info',
-          error.message,
-        );
-      }
-      throw new InternalServerErrorException(
-        'Unexpected error occurred',
-        error.message,
-      );
+      // if (error.isAxiosError) {
+      //   // AxiosError를 확인하고 처리
+      //   throw new InternalServerErrorException(
+      //     'Failed to fetch user info',
+      //     error.message,
+      //   );
+      // }
+      // throw new InternalServerErrorException(
+      //   'Unexpected error occurred',
+      //   error.message,
+      // );
+      throw AuthException.authNaverLoginError();
     }
   }
 }

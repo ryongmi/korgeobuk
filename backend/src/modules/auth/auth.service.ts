@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { scrypt as _scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
@@ -10,6 +6,7 @@ import { User } from '../../entities/user.entity';
 import { EntityManager } from 'typeorm';
 import { GoogleOAuthService } from './google-oauth.service';
 import { NaverOAuthService } from './naver-oauth.service';
+import { UserException } from 'src/exception';
 
 const scrypt = promisify(_scrypt);
 
@@ -21,7 +18,7 @@ export class AuthService {
     private naverOAuthService: NaverOAuthService,
   ) {}
 
-  async signinNaver(
+  async loginNaver(
     transactionManager: EntityManager,
     code: string,
     state: string,
@@ -58,7 +55,7 @@ export class AuthService {
     return { user, tokenData };
   }
 
-  async signinGoogle(transactionManager: EntityManager, code: string) {
+  async loginGoogle(transactionManager: EntityManager, code: string) {
     const { tokenData, googleUserInfo } =
       await this.googleOAuthService.getGoogleUserInfo(code);
 
@@ -92,18 +89,18 @@ export class AuthService {
     return { user, tokenData };
   }
 
-  async signin(userId: string, password: string) {
+  async login(userId: string, password: string) {
     const user = await this.userService.findByUserId(userId);
 
     if (!user) {
-      throw new NotFoundException('로그인 정보가 일치하지 않습니다.');
+      throw UserException.userNotFound();
     }
 
     const [salt, storedHash] = user.password.split(';');
 
     const hash = (await scrypt(password, salt, 32)) as Buffer;
     if (storedHash !== hash.toString('hex')) {
-      throw new BadRequestException('로그인 정보가 일치하지 않습니다.');
+      throw UserException.userInfoNotExist();
     }
 
     // 마지막 로그인 날짜 기록
@@ -120,7 +117,7 @@ export class AuthService {
     );
 
     if (users.length !== 0) {
-      throw new BadRequestException('아이디나 이메일이 사용중입니다.');
+      throw UserException.userUseIdOREmail();
     }
 
     const salt = randomBytes(8).toString('hex');
