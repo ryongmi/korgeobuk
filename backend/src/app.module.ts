@@ -5,6 +5,7 @@ import { UserModule } from './modules/user/user.module';
 import { AppConfigModule } from './config/app-config.module';
 import { DatabaseModule } from './database/database.module';
 import { SeederModule } from './seeder/seeder.module';
+import { ProjectModule } from './modules/project/project.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { SeederModule } from './seeder/seeder.module';
     DatabaseModule,
     UserModule,
     SeederModule,
+    ProjectModule,
     // RouterModule.register([
     //   {
     //     path: 'api',
