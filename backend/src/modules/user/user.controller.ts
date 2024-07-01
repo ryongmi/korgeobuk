@@ -10,25 +10,24 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { CreateUserDto } from './dtos/create-user.dto';
-import { AuthService } from '../auth/auth.service';
-import { Serialize } from '../../common/interceptors/serialize.interceptor';
-import { UserDto } from './dtos/user.dto';
-import { TransactionInterceptor } from '../../common/interceptors/transaction.interceptor';
-import { TransactionManager } from '../../common/decorators/transaction-manager.decorator';
 import { EntityManager } from 'typeorm';
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
+import { ApiTags } from '@nestjs/swagger';
+import { AuthService } from '../auth/auth.service';
+import { Serialize } from '../../common/interceptors/serialize.interceptor';
+import { TransactionInterceptor } from '../../common/interceptors/transaction.interceptor';
+import { TransactionManager } from '../../common/decorators/transaction-manager.decorator';
 import { OAuthStateGuard } from './guards/oauth-state.guard';
-import { LoginUserDto } from './dtos/login-user.dto';
+import { UserDto, CreateUserDto, LoginUserDto } from './dtos';
 import {
-  ApiBody,
-  ApiOperation,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+  SwaagerApiBody,
+  SwaagerApiOperation,
+  SwaagerApiQuery,
+  SwaagerApiOkResponse,
+  SwaagerApiErrorResponse,
+} from '../../common/decorators/swagger-api.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -40,8 +39,8 @@ export class UserController {
   ) {}
 
   @Get('/login-google')
-  @ApiOperation({ summary: 'Get all users' })
-  @ApiResponse({ status: 200, description: 'Successful retrieval of users.' })
+  @SwaagerApiOperation('구글 로그인')
+  @SwaagerApiOkResponse(200, '구글 로그인 OAuth로 redirect 성공')
   getLoginGoogle(@Res() res: Response) {
     const url =
       'https://accounts.google.com/o/oauth2/v2/auth' +
@@ -54,14 +53,10 @@ export class UserController {
   }
 
   @Get('/login-google/callback')
-  @ApiOperation({ summary: 'Get users with optional query parameters' })
-  @ApiQuery({
-    name: 'code',
-    required: true,
-    type: String,
-    description: 'Filter users by age',
-    example: 'defaultName',
-  })
+  @SwaagerApiOperation('구글 OAuth 정보 가져오기')
+  @SwaagerApiQuery('code', String, '구글에서 return시킨 code')
+  @SwaagerApiOkResponse(200, '구글 로그인 성공', UserDto)
+  @SwaagerApiErrorResponse(500, '로그인중 서버에서 에러가 발생')
   @UseInterceptors(TransactionInterceptor)
   async getLoginGoogleCallback(
     @Query('code') code: string,
@@ -89,6 +84,8 @@ export class UserController {
   }
 
   @Get('/login-naver')
+  @SwaagerApiOperation('네이버 로그인')
+  @SwaagerApiOkResponse(200, '네이버 로그인 OAuth로 redirect 성공')
   getLoginNaver(@Res() res: Response, @Session() session: Record<string, any>) {
     const state = randomBytes(8).toString('hex');
     session.stateCheck = {
@@ -107,24 +104,15 @@ export class UserController {
   }
 
   @Get('/login-naver/callback')
-  @ApiOperation({ summary: 'Get users with optional query parameters' })
-  @ApiQuery({
-    name: 'code',
-    required: true,
-    type: String,
-    description: 'Filter users by age',
-  })
-  @ApiQuery({
-    name: 'state',
-    required: true,
-    type: String,
-    description: 'Filter users by name',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'User created successfully.',
-    type: UserDto,
-  })
+  @SwaagerApiOperation('네이버 OAuth 정보 가져오기')
+  @SwaagerApiQuery('code', String, '네이버에서 return시킨 code')
+  @SwaagerApiQuery(
+    'state',
+    String,
+    '네이버 OAuth redirect전 서버에서 생성한 임의의 문자열',
+  )
+  @SwaagerApiOkResponse(200, '네이버 로그인 성공', UserDto)
+  @SwaagerApiErrorResponse(500, '로그인중 서버에서 에러가 발생')
   @UseGuards(OAuthStateGuard)
   @UseInterceptors(TransactionInterceptor)
   async getLoginNaverCallback(
@@ -159,6 +147,9 @@ export class UserController {
 
   @Post('/logout')
   @HttpCode(200)
+  @SwaagerApiOperation('로그아웃')
+  @SwaagerApiOkResponse(200, '로그아웃 성공')
+  @SwaagerApiErrorResponse(500, '로그아웃중 서버에서 에러가 발생')
   postLogout(@Session() session: Record<string, any>) {
     if (session.hasOwnProperty('user')) {
       delete session['user'];
@@ -172,9 +163,10 @@ export class UserController {
 
   @Post('/login')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Create user' })
-  @ApiResponse({ status: 201, description: 'User created successfully.' })
-  @ApiBody({ type: LoginUserDto })
+  @SwaagerApiOperation('로그인')
+  @SwaagerApiBody(LoginUserDto, '사이트 로그인시 필요한 BODY값')
+  @SwaagerApiOkResponse(200, '로그인 성공', UserDto)
+  @SwaagerApiErrorResponse(500, '로그인중 서버에서 에러가 발생')
   async postLogin(
     @Body() body: LoginUserDto,
     @Session() session: Record<string, any>,
@@ -197,13 +189,10 @@ export class UserController {
 
   @Post('/signup')
   @HttpCode(201)
-  @ApiOperation({ summary: 'Create user' })
-  @ApiResponse({
-    status: 201,
-    description: 'User created successfully.',
-    type: UserDto,
-  })
-  @ApiBody({ type: CreateUserDto })
+  @SwaagerApiOperation('회원가입')
+  @SwaagerApiBody(CreateUserDto, '회원가입시 필요한 BODY값')
+  @SwaagerApiOkResponse(201, '회원가입 성공', UserDto)
+  @SwaagerApiErrorResponse(500, '회원가입중 서버에서 에러가 발생')
   @UseInterceptors(TransactionInterceptor)
   async postCreateUser(
     @Body() body: CreateUserDto,
