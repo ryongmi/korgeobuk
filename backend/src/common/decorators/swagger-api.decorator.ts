@@ -7,6 +7,8 @@ import {
   ApiResponse,
   getSchemaPath,
 } from '@nestjs/swagger';
+import { ResponseFormatDto } from '../dtos/response-format.dto';
+import { ErrorFormatDto } from '../dtos/error-format.dto';
 
 /**
  *
@@ -31,31 +33,54 @@ export const SwaagerApiOkResponse = (
 ) => {
   if (dto) {
     return applyDecorators(
-      ApiExtraModels(dto),
+      ApiExtraModels(ResponseFormatDto, dto),
       ApiResponse({
         status,
         description,
         schema: {
-          type: 'object',
-          properties: {
-            statusCode: {
-              type: 'number',
-              example: status,
-              description: '해당 HTTP 코드',
+          allOf: [
+            { $ref: getSchemaPath(ResponseFormatDto) },
+            {
+              properties: {
+                data: {
+                  $ref: getSchemaPath(dto),
+                },
+              },
             },
-            isLogin: {
-              type: 'boolean',
-              example: false,
-              description: '로그인 유무',
-            },
-            data: { $ref: getSchemaPath(dto) },
-          },
+          ],
         },
       }),
     );
   } else {
     return ApiResponse({ status, description });
   }
+  // if (dto) {
+  //   return applyDecorators(
+  //     ApiExtraModels(dto),
+  //     ApiResponse({
+  //       status,
+  //       description,
+  //       schema: {
+  //         type: 'object',
+  //         properties: {
+  //           statusCode: {
+  //             type: 'number',
+  //             example: status,
+  //             description: '해당 HTTP 코드',
+  //           },
+  //           isLogin: {
+  //             type: 'boolean',
+  //             example: false,
+  //             description: '로그인 유무',
+  //           },
+  //           data: { $ref: getSchemaPath(dto) },
+  //         },
+  //       },
+  //     }),
+  //   );
+  // } else {
+  //   return ApiResponse({ status, description });
+  // }
 };
 
 /**
@@ -68,26 +93,27 @@ export const SwaagerApiErrorResponse = (status: number, description: string) =>
   ApiResponse({
     status,
     description,
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: {
-          type: 'number',
-          example: status,
-          description: '해당 HTTP 코드',
-        },
-        error: {
-          type: 'string',
-          example: 'Bad Request',
-          description: '에러발생시 해당 에러종류',
-        },
-        message: {
-          type: 'string',
-          example: '서버에서 에러가 발생하였습니다.',
-          description: '에러발생시 해당 에러관련 메세지',
-        },
-      },
-    },
+    type: ErrorFormatDto,
+    // schema: {
+    //   type: 'object',
+    //   properties: {
+    //     statusCode: {
+    //       type: 'number',
+    //       example: status,
+    //       description: '해당 HTTP 코드',
+    //     },
+    //     error: {
+    //       type: 'string',
+    //       example: 'Bad Request',
+    //       description: '에러발생시 해당 에러종류',
+    //     },
+    //     message: {
+    //       type: 'string',
+    //       example: '서버에서 에러가 발생하였습니다.',
+    //       description: '에러발생시 해당 에러관련 메세지',
+    //     },
+    //   },
+    // },
   });
 
 /**
