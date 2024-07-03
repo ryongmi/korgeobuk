@@ -50,7 +50,7 @@ export class GoogleOAuthService {
       //   'Unexpected error occurred',
       //   error.message,
       // );
-      throw AuthException.authNaverLoginError();
+      throw AuthException.authLoginError();
     }
   }
 }
