@@ -10,5 +10,6 @@ export function setSwagger(app: INestApplication) {
     .build();
 
   const document = SwaggerModule.createDocument(app, options);
+
   SwaggerModule.setup('api-docs', app, document);
 }
